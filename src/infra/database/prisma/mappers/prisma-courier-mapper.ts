@@ -9,6 +9,7 @@ export abstract class PrismaCourierMapper {
         name: raw.name,
         email: raw.email,
         password: raw.password,
+        role: raw.role,
       },
       new UniqueEntityId(raw.id),
     )

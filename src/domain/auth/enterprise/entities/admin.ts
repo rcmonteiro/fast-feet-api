@@ -1,14 +1,14 @@
 import { Entity } from '@/core/entities/entity'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 
-export interface CourierProps {
+export interface AdminProps {
   name: string
   email: string
   password: string
   role: 'ADMIN' | 'COURIER'
 }
 
-export class Courier extends Entity<CourierProps> {
+export class Admin extends Entity<AdminProps> {
   get name() {
     return this.props.name
   }
@@ -25,8 +25,8 @@ export class Courier extends Entity<CourierProps> {
     return this.props.role
   }
 
-  static create(props: CourierProps, id?: UniqueEntityId) {
-    const courier = new Courier(props, id)
-    return courier
+  static create(props: AdminProps, id?: UniqueEntityId) {
+    const admin = new Admin(props, id)
+    return admin
   }
 }

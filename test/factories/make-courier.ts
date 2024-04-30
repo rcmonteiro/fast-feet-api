@@ -17,6 +17,7 @@ export const makeCourier = (
       name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password(),
+      role: 'COURIER',
       ...override,
     },
     id,
@@ -31,7 +32,9 @@ export class CourierFactory {
   async makeDbCourier(data: Partial<CourierProps> = {}): Promise<Courier> {
     const courier = makeCourier(data)
 
-    await this.db.user.create({ data: PrismaCourierMapper.toPrisma(courier) })
+    const courierData = PrismaCourierMapper.toPrisma(courier)
+
+    await this.db.user.create({ data: { role: 'COURIER', ...courierData } })
 
     return courier
   }

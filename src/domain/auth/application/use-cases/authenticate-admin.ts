@@ -1,16 +1,16 @@
 import { Either, left, right } from '@/core/either'
-import { CouriersRepository } from '@/domain/auth/application/repositories/couriers-repository'
+import { AdminsRepository } from '@/domain/auth/application/repositories/admins-repository'
 import { Injectable } from '@nestjs/common'
 import { Encrypter } from '../criptography/encrypter'
 import { HashComparator } from '../criptography/hash-comparator'
 import { WrongCredentialsError } from './errors/wrong-credentials-error'
 
-interface AuthenticateCourierUseCaseRequest {
+interface AuthenticateAdminUseCaseRequest {
   email: string
   password: string
 }
 
-type AuthenticateCourierUseCaseResponse = Either<
+type AuthenticateAdminUseCaseResponse = Either<
   WrongCredentialsError,
   {
     accessToken: string
@@ -18,9 +18,9 @@ type AuthenticateCourierUseCaseResponse = Either<
 >
 
 @Injectable()
-export class AuthenticateCourierUseCase {
+export class AuthenticateAdminUseCase {
   constructor(
-    private couriersRepository: CouriersRepository,
+    private adminsRepository: AdminsRepository,
     private hashComparator: HashComparator,
     private encrypter: Encrypter,
   ) {}
@@ -28,20 +28,20 @@ export class AuthenticateCourierUseCase {
   async execute({
     email,
     password,
-  }: AuthenticateCourierUseCaseRequest): Promise<AuthenticateCourierUseCaseResponse> {
-    const courier = await this.couriersRepository.findByEmail(email)
+  }: AuthenticateAdminUseCaseRequest): Promise<AuthenticateAdminUseCaseResponse> {
+    const admin = await this.adminsRepository.findByEmail(email)
 
-    if (!courier) {
+    if (!admin) {
       return left(new WrongCredentialsError())
     }
-    console.log(courier.role)
-    if (courier.role !== 'COURIER') {
+
+    if (admin.role !== 'ADMIN') {
       return left(new WrongCredentialsError())
     }
 
     const passwordMatch = await this.hashComparator.compare(
       password,
-      courier.password,
+      admin.password,
     )
 
     if (!passwordMatch) {
@@ -49,7 +49,7 @@ export class AuthenticateCourierUseCase {
     }
 
     const accessToken = await this.encrypter.encrypt({
-      sub: courier.id.toString(),
+      sub: admin.id.toString(),
     })
 
     return right({ accessToken })

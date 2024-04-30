@@ -4,34 +4,36 @@ import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { hash } from 'bcryptjs'
 import request from 'supertest'
-import { CourierFactory } from 'test/factories/make-courier'
+import { AdminFactory } from 'test/factories/make-admin'
 
-describe('Authenticate Courier (e2e)', () => {
+describe('Authenticate Admin (e2e)', () => {
   let app: INestApplication
-  let courierFactory: CourierFactory
+  let adminFactory: AdminFactory
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [CourierFactory],
+      providers: [AdminFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
-    courierFactory = moduleRef.get(CourierFactory)
+    adminFactory = moduleRef.get(AdminFactory)
 
     await app.init()
   })
 
-  test('[POST] /sessions', async () => {
-    await courierFactory.makeDbCourier({
+  test('[POST] /admins/sessions', async () => {
+    await adminFactory.makeDbAdmin({
       email: 'john.doe@me.com',
       password: await hash('123456', 8),
     })
 
-    const response = await request(app.getHttpServer()).post('/sessions').send({
-      email: 'john.doe@me.com',
-      password: '123456',
-    })
+    const response = await request(app.getHttpServer())
+      .post('/admins/sessions')
+      .send({
+        email: 'john.doe@me.com',
+        password: '123456',
+      })
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual({
