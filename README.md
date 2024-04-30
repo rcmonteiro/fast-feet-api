@@ -2,8 +2,8 @@
 
 ## Regras da aplicação
 
-[ ] A aplicação deve ter dois tipos de usuário, entregador e/ou admin
-[ ] Deve ser possível realizar login com CPF e Senha
+[x] A aplicação deve ter dois tipos de usuário, entregador e/ou admin
+[x] Deve ser possível realizar login com CPF e Senha
 [ ] Deve ser possível realizar o CRUD dos entregadores
 [ ] Deve ser possível realizar o CRUD das encomendas
 [ ] Deve ser possível realizar o CRUD dos destinatários

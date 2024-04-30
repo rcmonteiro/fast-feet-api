@@ -8,6 +8,7 @@ export abstract class PrismaCourierMapper {
       {
         name: raw.name,
         email: raw.email,
+        cpf: raw.cpf,
         password: raw.password,
         role: raw.role,
       },
@@ -20,6 +21,7 @@ export abstract class PrismaCourierMapper {
       id: courier.id.toString(),
       name: courier.name,
       email: courier.email,
+      cpf: courier.cpf,
       password: courier.password,
     }
   }

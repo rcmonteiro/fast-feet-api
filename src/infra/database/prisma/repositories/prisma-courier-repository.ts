@@ -20,9 +20,9 @@ export class PrismaCouriersRepository implements CouriersRepository {
     return PrismaCourierMapper.toDomain(courier)
   }
 
-  async findByEmail(email: string): Promise<Courier | null> {
+  async findByCPF(cpf: string): Promise<Courier | null> {
     const courier = await this.db.user.findUnique({
-      where: { email },
+      where: { cpf },
     })
 
     if (!courier) {

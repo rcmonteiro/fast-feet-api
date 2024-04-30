@@ -23,13 +23,13 @@ describe('Authenticate Courier Use Case (unit tests)', () => {
 
   it('should be able to authenticate a courier', async () => {
     const courier = makeCourier({
-      email: 'john-doe@me',
+      cpf: 12345678974,
       password: await fakeHasher.hash('123123'),
     })
     inMemoryCouriersRepository.items.push(courier)
 
     const result = await sut.execute({
-      email: 'john-doe@me',
+      cpf: 12345678974,
       password: '123123',
     })
 

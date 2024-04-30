@@ -4,6 +4,7 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 export interface CourierProps {
   name: string
   email: string
+  cpf: string
   password: string
   role: 'ADMIN' | 'COURIER'
 }
@@ -15,6 +16,10 @@ export class Courier extends Entity<CourierProps> {
 
   get email() {
     return this.props.email
+  }
+
+  get cpf() {
+    return this.props.cpf
   }
 
   get password() {

@@ -6,7 +6,7 @@ import { HashComparator } from '../criptography/hash-comparator'
 import { WrongCredentialsError } from './errors/wrong-credentials-error'
 
 interface AuthenticateCourierUseCaseRequest {
-  email: string
+  cpf: string
   password: string
 }
 
@@ -26,15 +26,15 @@ export class AuthenticateCourierUseCase {
   ) {}
 
   async execute({
-    email,
+    cpf,
     password,
   }: AuthenticateCourierUseCaseRequest): Promise<AuthenticateCourierUseCaseResponse> {
-    const courier = await this.couriersRepository.findByEmail(email)
+    const courier = await this.couriersRepository.findByCPF(cpf)
 
     if (!courier) {
       return left(new WrongCredentialsError())
     }
-    console.log(courier.role)
+
     if (courier.role !== 'COURIER') {
       return left(new WrongCredentialsError())
     }

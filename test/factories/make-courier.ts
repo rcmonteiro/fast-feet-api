@@ -16,6 +16,7 @@ export const makeCourier = (
     {
       name: faker.person.fullName(),
       email: faker.internet.email(),
+      cpf: faker.number.int({ min: 100000000, max: 10000000000 }).toString(),
       password: faker.internet.password(),
       role: 'COURIER',
       ...override,

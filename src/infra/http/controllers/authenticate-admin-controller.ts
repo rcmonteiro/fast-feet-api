@@ -14,7 +14,7 @@ import {
 import { z } from 'zod'
 
 const authenticateBodySchema = z.object({
-  email: z.string().email(),
+  cpf: z.string(),
   password: z.string().min(6),
 })
 
@@ -29,9 +29,9 @@ export class AuthenticateAdmin {
   @HttpCode(200)
   @UsePipes(new ZodValidationPipe(authenticateBodySchema))
   async handle(@Body() body: TAuthenticate) {
-    const { email, password } = body
+    const { cpf, password } = body
     const result = await this.authenticateAdmin.execute({
-      email,
+      cpf,
       password,
     })
 

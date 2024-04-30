@@ -20,9 +20,9 @@ export class PrismaAdminsRepository implements AdminsRepository {
     return PrismaAdminMapper.toDomain(admin)
   }
 
-  async findByEmail(email: string): Promise<Admin | null> {
+  async findByCPF(cpf: string): Promise<Admin | null> {
     const admin = await this.db.user.findUnique({
-      where: { email },
+      where: { cpf },
     })
 
     if (!admin) {

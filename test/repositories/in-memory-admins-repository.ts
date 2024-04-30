@@ -9,8 +9,8 @@ export class InMemoryAdminsRepository implements AdminsRepository {
     return admin ?? null
   }
 
-  async findByEmail(email: string): Promise<Admin | null> {
-    const admin = this.items.find((item) => item.email === email)
+  async findByCPF(cpf: string): Promise<Admin | null> {
+    const admin = this.items.find((item) => item.cpf === cpf)
     return admin ?? null
   }
 

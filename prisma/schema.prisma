@@ -22,6 +22,7 @@ model User {
   id            String         @id @default(uuid())
   name          String
   email         String         @unique
+  cpf           String         @unique @default("")
   password      String
   role          UserRole       @default(COURIER)
   notifications Notification[]

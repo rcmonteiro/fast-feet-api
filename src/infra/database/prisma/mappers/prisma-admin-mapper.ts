@@ -8,6 +8,7 @@ export abstract class PrismaAdminMapper {
       {
         name: raw.name,
         email: raw.email,
+        cpf: raw.cpf,
         password: raw.password,
         role: raw.role,
       },
@@ -20,6 +21,7 @@ export abstract class PrismaAdminMapper {
       id: admin.id.toString(),
       name: admin.name,
       email: admin.email,
+      cpf: admin.cpf,
       password: admin.password,
     }
   }

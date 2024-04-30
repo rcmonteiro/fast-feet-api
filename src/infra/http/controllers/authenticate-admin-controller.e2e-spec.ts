@@ -24,14 +24,14 @@ describe('Authenticate Admin (e2e)', () => {
 
   test('[POST] /admins/sessions', async () => {
     await adminFactory.makeDbAdmin({
-      email: 'john.doe@me.com',
+      cpf: '12345678974',
       password: await hash('123456', 8),
     })
 
     const response = await request(app.getHttpServer())
       .post('/admins/sessions')
       .send({
-        email: 'john.doe@me.com',
+        cpf: '12345678974',
         password: '123456',
       })
 

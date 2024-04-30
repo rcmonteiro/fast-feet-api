@@ -23,13 +23,13 @@ describe('Authenticate Admin Use Case (unit tests)', () => {
 
   it('should be able to authenticate a admin', async () => {
     const admin = makeAdmin({
-      email: 'john-doe@me',
+      cpf: 12345678974,
       password: await fakeHasher.hash('123123'),
     })
     inMemoryAdminsRepository.items.push(admin)
 
     const result = await sut.execute({
-      email: 'john-doe@me',
+      cpf: 12345678974,
       password: '123123',
     })
 

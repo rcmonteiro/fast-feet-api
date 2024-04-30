@@ -6,7 +6,7 @@ import { HashComparator } from '../criptography/hash-comparator'
 import { WrongCredentialsError } from './errors/wrong-credentials-error'
 
 interface AuthenticateAdminUseCaseRequest {
-  email: string
+  cpf: string
   password: string
 }
 
@@ -26,10 +26,10 @@ export class AuthenticateAdminUseCase {
   ) {}
 
   async execute({
-    email,
+    cpf,
     password,
   }: AuthenticateAdminUseCaseRequest): Promise<AuthenticateAdminUseCaseResponse> {
-    const admin = await this.adminsRepository.findByEmail(email)
+    const admin = await this.adminsRepository.findByCPF(cpf)
 
     if (!admin) {
       return left(new WrongCredentialsError())
