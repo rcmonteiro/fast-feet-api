@@ -26,6 +26,7 @@ model User {
   password      String
   role          UserRole       @default(COURIER)
   notifications Notification[]
+  Package       Package[]
 
   @@map("users")
 }
@@ -43,7 +44,7 @@ model Notification {
 }
 
 model Recipient {
-  id         String  @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
   city       String
   state      String
@@ -53,4 +54,23 @@ model Recipient {
   complement String?
   latitude   Decimal
   longitude  Decimal
+  Package    Package[]
+
+  @@map("recipients")
+}
+
+model Package {
+  id          String    @id @default(uuid())
+  recipientId String    @map("recipient_id")
+  courierId   String?   @map("courier_id")
+  name        String
+  postedAt    DateTime  @default(now()) @map("posted_at")
+  collectedAt DateTime? @map("collected_at")
+  deliveredAt DateTime? @map("delivered_at")
+  returnedAt  DateTime? @map("returned_at")
+
+  recipient Recipient @relation(fields: [recipientId], references: [id])
+  courier   User?     @relation(fields: [courierId], references: [id])
+
+  @@map("packages")
 }

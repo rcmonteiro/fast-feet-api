@@ -30,8 +30,6 @@ describe('Update Recipient Use Case (unit tests)', () => {
       longitude: recipient.longitude,
     })
 
-    console.log(recipient)
-
     expect(result.isRight()).toBe(true)
     if (result.isRight()) {
       expect(result.value?.recipient).toBeInstanceOf(Recipient)

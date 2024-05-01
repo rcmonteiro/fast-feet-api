@@ -1,5 +1,4 @@
 import { Either, right } from '@/core/either'
-import { HashGenerator } from '@/domain/auth/application/criptography/hash-generator'
 import { RecipientsRepository } from '@/domain/operations/application/repositories/recipients-repository'
 import { Recipient } from '@/domain/operations/enterprise/entities/recipient'
 import { Injectable } from '@nestjs/common'
@@ -25,10 +24,7 @@ type CreateRecipientUseCaseResponse = Either<
 
 @Injectable()
 export class CreateRecipientUseCase {
-  constructor(
-    private recipientsRepository: RecipientsRepository,
-    private hashGenerator: HashGenerator,
-  ) {}
+  constructor(private recipientsRepository: RecipientsRepository) {}
 
   async execute({
     name,
