@@ -6,5 +6,8 @@ export abstract class PackagesRepository {
   abstract save(packageOrder: Package): Promise<void>
   abstract delete(packageOrder: Package): Promise<void>
   abstract findById(id: string): Promise<Package | null>
-  abstract findMany(params: PaginationParams): Promise<Package[]>
+  abstract findMany(
+    params: PaginationParams,
+    courierId?: string,
+  ): Promise<Package[]>
 }

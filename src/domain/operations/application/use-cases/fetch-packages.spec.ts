@@ -1,3 +1,4 @@
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { makePackage } from 'test/factories/make-package'
 import { InMemoryPackagesRepository } from 'test/repositories/in-memory-packages-repository'
 import { FetchPackagesUseCase } from './fetch-packages'
@@ -31,6 +32,25 @@ describe('Fetch Packages Use Case (unit tests)', () => {
 
     const result = await sut.execute({
       page: 2,
+    })
+
+    expect(result.isRight()).toBe(true)
+    expect(result.value?.packages).toHaveLength(2)
+  })
+
+  it('should be able to fetch packages from a given courier', async () => {
+    await inMemoryPackagesRepository.create(
+      makePackage({ courierId: new UniqueEntityId('courier-1') }),
+    )
+    await inMemoryPackagesRepository.create(
+      makePackage({ courierId: new UniqueEntityId('courier-1') }),
+    )
+    await inMemoryPackagesRepository.create(makePackage())
+    await inMemoryPackagesRepository.create(makePackage())
+
+    const result = await sut.execute({
+      page: 1,
+      courierId: 'courier-1',
     })
 
     expect(result.isRight()).toBe(true)

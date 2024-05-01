@@ -1,3 +1,4 @@
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
 import { Package } from '@/domain/operations/enterprise/entities/package'
@@ -10,9 +11,16 @@ export class InMemoryPackagesRepository implements PackagesRepository {
     return packageOrder ?? null
   }
 
-  async findMany({ page }: PaginationParams): Promise<Package[]> {
-    const packages = this.items.slice((page - 1) * 20, page * 20)
-    return packages
+  async findMany(
+    { page }: PaginationParams,
+    courierId?: string,
+  ): Promise<Package[]> {
+    if (courierId) {
+      return this.items
+        .filter((item) => item.courierId?.equals(new UniqueEntityId(courierId)))
+        .slice((page - 1) * 20, page * 20)
+    }
+    return this.items.slice((page - 1) * 20, page * 20)
   }
 
   async create(packageOrder: Package): Promise<void> {

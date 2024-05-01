@@ -23,8 +23,16 @@ export class PrismaPackagesRepository implements PackagesRepository {
     return PrismaPackageMapper.toDomain(packageOrder)
   }
 
-  async findMany({ page }: PaginationParams): Promise<Package[]> {
+  async findMany(
+    { page }: PaginationParams,
+    courierId?: string,
+  ): Promise<Package[]> {
     const packages = await this.db.package.findMany({
+      where: courierId
+        ? {
+            courierId,
+          }
+        : {},
       take: this.PAGE_SIZE,
       skip: (page - 1) * this.PAGE_SIZE,
     })

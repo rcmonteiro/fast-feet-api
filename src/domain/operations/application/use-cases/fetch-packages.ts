@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common'
 
 interface FetchPackagesUseCaseRequest {
   page: number
+  courierId?: string
 }
 
 type FetchPackagesUseCaseResponse = Either<
@@ -20,8 +21,9 @@ export class FetchPackagesUseCase {
 
   async execute({
     page,
+    courierId,
   }: FetchPackagesUseCaseRequest): Promise<FetchPackagesUseCaseResponse> {
-    const packages = await this.packagesRepository.findMany({ page })
+    const packages = await this.packagesRepository.findMany({ page }, courierId)
 
     return right({
       packages,
