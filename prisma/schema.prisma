@@ -41,3 +41,16 @@ model Notification {
 
   @@map("notifications")
 }
+
+model Recipient {
+  id         String  @id @default(uuid())
+  name       String
+  city       String
+  state      String
+  postalCode String
+  address    String
+  number     String
+  complement String?
+  latitude   Decimal
+  longitude  Decimal
+}
