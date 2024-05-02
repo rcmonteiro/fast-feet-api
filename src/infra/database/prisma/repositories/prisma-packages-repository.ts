@@ -1,3 +1,4 @@
+import { DomainEvents } from '@/core/events/domain-events'
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
 import { Package } from '@/domain/operations/enterprise/entities/package'
@@ -55,6 +56,8 @@ export class PrismaPackagesRepository implements PackagesRepository {
       },
       data,
     })
+
+    DomainEvents.dispatchEventsForAggregate(packageOrder.id)
   }
 
   async delete(packageOrder: Package): Promise<void> {

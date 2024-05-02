@@ -19,14 +19,13 @@ enum UserRole {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String
-  email         String         @unique
-  cpf           String         @unique @default("")
-  password      String
-  role          UserRole       @default(COURIER)
-  notifications Notification[]
-  Package       Package[]
+  id       String    @id @default(uuid())
+  name     String
+  email    String    @unique
+  cpf      String    @unique @default("")
+  password String
+  role     UserRole  @default(COURIER)
+  Package  Package[]
 
   @@map("users")
 }
@@ -38,23 +37,24 @@ model Notification {
   content     String
   readAt      DateTime? @map("read_at")
   createdAt   DateTime  @default(now()) @map("created_at")
-  recipient   User      @relation(fields: [recipientId], references: [id])
+  recipient   Recipient @relation(fields: [recipientId], references: [id])
 
   @@map("notifications")
 }
 
 model Recipient {
-  id         String    @id @default(uuid())
-  name       String
-  city       String
-  state      String
-  postalCode String
-  address    String
-  number     String
-  complement String?
-  latitude   Decimal
-  longitude  Decimal
-  Package    Package[]
+  id            String         @id @default(uuid())
+  name          String
+  city          String
+  state         String
+  postalCode    String
+  address       String
+  number        String
+  complement    String?
+  latitude      Decimal
+  longitude     Decimal
+  Package       Package[]
+  notifications Notification[]
 
   @@map("recipients")
 }

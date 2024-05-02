@@ -1,4 +1,5 @@
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { DomainEvents } from '@/core/events/domain-events'
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
 import { Package } from '@/domain/operations/enterprise/entities/package'
@@ -33,6 +34,7 @@ export class InMemoryPackagesRepository implements PackagesRepository {
     )
     if (findIndex >= 0) {
       this.items[findIndex] = packageOrder
+      DomainEvents.dispatchEventsForAggregate(packageOrder.id)
     }
   }
 

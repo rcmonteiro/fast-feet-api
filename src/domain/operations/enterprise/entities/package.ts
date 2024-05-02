@@ -1,6 +1,7 @@
-import { Entity } from '@/core/entities/entity'
+import { AggregateRoot } from '@/core/entities/aggregate-root'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Optional } from '@/core/types/optional'
+import { PackageStatusChangeEvent } from '@/domain/delivery/enterprise/events/package-status-change-event'
 
 export interface PackageProps {
   name: string
@@ -12,7 +13,7 @@ export interface PackageProps {
   returnedAt?: Date | null
 }
 
-export class Package extends Entity<PackageProps> {
+export class Package extends AggregateRoot<PackageProps> {
   get name(): string {
     return this.props.name
   }
@@ -47,6 +48,7 @@ export class Package extends Entity<PackageProps> {
 
   set collectedAt(collectedAt: Date | null | undefined) {
     this.props.collectedAt = collectedAt
+    this.addDomainEvent(new PackageStatusChangeEvent(this, 'COLLECTED'))
   }
 
   get deliveredAt(): Date | null | undefined {
@@ -55,6 +57,7 @@ export class Package extends Entity<PackageProps> {
 
   set deliveredAt(deliveredAt: Date | null | undefined) {
     this.props.deliveredAt = deliveredAt
+    this.addDomainEvent(new PackageStatusChangeEvent(this, 'DELIVERED'))
   }
 
   get returnedAt(): Date | null | undefined {

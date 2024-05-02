@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
-      POSTGRES_DB: nest-clean
+      POSTGRES_DB: fast-feet
       PGDATA: /data/postgres
     volumes:
       - ./data/pg:/data/postgres
