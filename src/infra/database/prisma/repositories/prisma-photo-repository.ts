@@ -16,4 +16,24 @@ export class PrismaPhotosRepository implements PhotosRepository {
       data,
     })
   }
+
+  async save(photo: Photo): Promise<void> {
+    const data = PrismaPhotoMapper.toPrisma(photo)
+
+    await this.prisma.photo.update({
+      where: {
+        id: photo.id.toString(),
+      },
+      data,
+    })
+  }
+
+  async findById(id: string): Promise<Photo | null> {
+    const photo = await this.prisma.photo.findUnique({
+      where: {
+        id,
+      },
+    })
+    return photo ? PrismaPhotoMapper.toDomain(photo) : null
+  }
 }

@@ -7,6 +7,7 @@ import { RolesGuard } from '@/infra/auth/jwt-roles.guard'
 import { TTokenPayload } from '@/infra/auth/jwt.strategy'
 import {
   BadRequestException,
+  Body,
   Controller,
   ForbiddenException,
   HttpCode,
@@ -24,12 +25,14 @@ export class DeliverPackageController {
   @HttpCode(204)
   async handle(
     @Param('packageId') packageId: string,
+    @Body() photoId: string,
     @CurrentUser() user: TTokenPayload,
   ) {
     const courierId = user.sub
     const result = await this.deliverPackage.execute({
       packageId,
       courierId,
+      photoId,
     })
 
     if (result.isLeft()) {
