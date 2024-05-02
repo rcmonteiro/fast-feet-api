@@ -9,5 +9,8 @@ export abstract class PackagesRepository {
   abstract findMany(
     params: PaginationParams,
     courierId?: string,
+    distance?: number,
+    userLatitude?: number,
+    userLongitude?: number,
   ): Promise<Package[]>
 }

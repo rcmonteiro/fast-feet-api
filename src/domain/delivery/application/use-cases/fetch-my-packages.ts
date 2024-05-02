@@ -6,6 +6,9 @@ import { Injectable } from '@nestjs/common'
 interface FetchMyPackagesUseCaseRequest {
   page: number
   courierId: string
+  distance?: number
+  userLatitude?: number
+  userLongitude?: number
 }
 
 type FetchMyPackagesUseCaseResponse = Either<
@@ -22,8 +25,17 @@ export class FetchMyPackagesUseCase {
   async execute({
     page,
     courierId,
+    distance,
+    userLatitude,
+    userLongitude,
   }: FetchMyPackagesUseCaseRequest): Promise<FetchMyPackagesUseCaseResponse> {
-    const packages = await this.packagesRepository.findMany({ page }, courierId)
+    const packages = await this.packagesRepository.findMany(
+      { page },
+      courierId,
+      distance,
+      userLatitude,
+      userLongitude,
+    )
 
     return right({
       packages,
