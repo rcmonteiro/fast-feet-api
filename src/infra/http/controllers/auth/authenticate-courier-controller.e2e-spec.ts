@@ -32,7 +32,6 @@ describe('Authenticate Courier (e2e)', () => {
       cpf: '12345678974',
       password: '123456',
     })
-    console.log(response.body)
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual({

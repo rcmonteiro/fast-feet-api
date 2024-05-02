@@ -17,7 +17,7 @@ export const makeRecipient = (
       name: faker.person.fullName(),
       city: faker.location.city(),
       state: faker.location.state(),
-      postalCode: faker.location.state(),
+      postalCode: faker.location.zipCode(),
       address: faker.location.state(),
       number: faker.number.int({ min: 1, max: 100 }).toString(),
       latitude: faker.location.latitude(),
