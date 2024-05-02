@@ -28,7 +28,7 @@ describe('Update Courier (e2e)', () => {
     await app.init()
   })
 
-  test('[PUT] /couriers', async () => {
+  test('[PUT] /couriers/:courierId', async () => {
     const courier = await courierFactory.makeDbCourier()
     const courierId = courier.id.toString()
     const admin = makeAdmin()

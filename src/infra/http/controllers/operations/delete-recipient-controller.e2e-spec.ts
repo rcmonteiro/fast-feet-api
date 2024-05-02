@@ -25,7 +25,7 @@ describe('Delete Recipient (e2e)', () => {
     await app.init()
   })
 
-  test('[DELETE] /recipients', async () => {
+  test('[DELETE] /recipients/:recipientId', async () => {
     const admin = makeAdmin()
     const recipient = await recipientFactory.makeDbRecipient()
 

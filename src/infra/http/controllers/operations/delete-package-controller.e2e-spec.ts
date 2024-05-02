@@ -28,7 +28,7 @@ describe('Delete Package (e2e)', () => {
     await app.init()
   })
 
-  test('[DELETE] /packages', async () => {
+  test('[DELETE] /packages/:packageId', async () => {
     const admin = makeAdmin()
     const recipient = await recipientFactory.makeDbRecipient()
     const packageOrder = await packageFactory.makeDbPackage({

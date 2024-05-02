@@ -25,7 +25,7 @@ describe('Delete Courier (e2e)', () => {
     await app.init()
   })
 
-  test('[DELETE] /couriers', async () => {
+  test('[DELETE] /couriers/:courierId', async () => {
     const admin = makeAdmin()
     const courier = await courierFactory.makeDbCourier()
     const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })

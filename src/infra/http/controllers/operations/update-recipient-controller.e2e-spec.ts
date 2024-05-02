@@ -28,7 +28,7 @@ describe('Update Recipient (e2e)', () => {
     await app.init()
   })
 
-  test('[PUT] /recipients', async () => {
+  test('[PUT] /recipients/:recipientId', async () => {
     const recipient = await recipientFactory.makeDbRecipient()
     const recipientId = recipient.id.toString()
     const admin = makeAdmin()

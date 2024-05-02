@@ -8,6 +8,7 @@ import { FetchCouriersUseCase } from '@/domain/operations/application/use-cases/
 import { FetchPackagesUseCase } from '@/domain/operations/application/use-cases/fetch-packages'
 import { FetchRecipientsUseCase } from '@/domain/operations/application/use-cases/fetch-recipients'
 import { UpdateCourierUseCase } from '@/domain/operations/application/use-cases/update-courier'
+import { UpdateCourierPasswordUseCase } from '@/domain/operations/application/use-cases/update-courier-password'
 import { UpdatePackageUseCase } from '@/domain/operations/application/use-cases/update-package'
 import { UpdateRecipientUseCase } from '@/domain/operations/application/use-cases/update-recipient'
 import { CryptographyModule } from '@/infra/cryptography/cryptography.module'
@@ -24,6 +25,7 @@ import { FetchCourierController } from './fetch-couriers-controller'
 import { FetchPackageController } from './fetch-packages-controller'
 import { FetchRecipientController } from './fetch-recipients-controller'
 import { UpdateCourierController } from './update-courier-controller'
+import { UpdateCourierPasswordController } from './update-courier-password-controller'
 import { UpdatePackageController } from './update-package-controller'
 import { UpdateRecipientController } from './update-recipient-controller'
 
@@ -42,6 +44,7 @@ import { UpdateRecipientController } from './update-recipient-controller'
     UpdateCourierController,
     UpdatePackageController,
     UpdateRecipientController,
+    UpdateCourierPasswordController,
   ],
   providers: [
     CreateCourierUseCase,
@@ -56,6 +59,7 @@ import { UpdateRecipientController } from './update-recipient-controller'
     UpdateCourierUseCase,
     UpdatePackageUseCase,
     UpdateRecipientUseCase,
+    UpdateCourierPasswordUseCase,
   ],
 })
 export class OperationsControllersModule {}

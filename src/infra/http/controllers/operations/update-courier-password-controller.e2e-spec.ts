@@ -1,40 +1,55 @@
-import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { Courier } from '@/domain/auth/enterprise/entities/courier'
-import { FakeHasher } from 'test/cryptography/fake-hasher'
-import { makeCourier } from 'test/factories/make-courier'
-import { InMemoryCouriersRepository } from 'test/repositories/in-memory-couriers-repository'
-import { UpdateCourierPasswordUseCase } from './update-courier-password'
+import { HashComparator } from '@/domain/auth/application/criptography/hash-comparator'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { makeAdmin } from 'test/factories/make-admin'
+import { CourierFactory } from 'test/factories/make-courier'
 
-let fakeHasher: FakeHasher
-let inMemoryCouriersRepository: InMemoryCouriersRepository
-let sut: UpdateCourierPasswordUseCase
+describe('Update Courier Password (e2e)', () => {
+  let app: INestApplication
+  let jwt: JwtService
+  let db: PrismaService
+  let courierFactory: CourierFactory
+  let hashComparator: HashComparator
 
-describe('Update Courier Password Use Case (unit tests)', () => {
-  beforeEach(() => {
-    fakeHasher = new FakeHasher()
-    inMemoryCouriersRepository = new InMemoryCouriersRepository()
-    sut = new UpdateCourierPasswordUseCase(
-      inMemoryCouriersRepository,
-      fakeHasher,
-    )
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [CourierFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+    jwt = moduleRef.get(JwtService)
+    db = moduleRef.get(PrismaService)
+    hashComparator = moduleRef.get(HashComparator)
+    courierFactory = moduleRef.get(CourierFactory)
+
+    await app.init()
   })
 
-  it('should be able to set a new password for a courier', async () => {
-    await inMemoryCouriersRepository.create(
-      makeCourier({}, new UniqueEntityId('courier-1')),
-    )
-    const newPassword = 'new password'
-    const result = await sut.execute({
-      courierId: 'courier-1',
-      password: newPassword,
-    })
+  test('[PUT] /couriers/:courierId', async () => {
+    const courier = await courierFactory.makeDbCourier()
+    const courierId = courier.id.toString()
+    const admin = makeAdmin()
+    const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
+    const newPassword = 'password updated'
+    const response = await request(app.getHttpServer())
+      .put(`/couriers/${courierId}/password`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        password: newPassword,
+      })
 
-    expect(result.isRight()).toBe(true)
-    if (result.isRight()) {
-      expect(result.value?.courier).toBeInstanceOf(Courier)
-      expect(inMemoryCouriersRepository.items[0].password).toEqual(
-        newPassword.concat('-hashed'),
-      )
-    }
+    const courierInDb = await db.user.findFirst()
+    const matchPassword = await hashComparator.compare(
+      newPassword,
+      courierInDb?.password ?? '',
+    )
+    expect(response.status).toBe(204)
+    expect(matchPassword).toBeTruthy()
   })
 })

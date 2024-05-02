@@ -31,7 +31,7 @@ describe('Create Package (e2e)', () => {
     await app.init()
   })
 
-  test('[PUT] /packages', async () => {
+  test('[PUT] /packages/:packageId', async () => {
     const recipient = await recipientFactory.makeDbRecipient()
     const packageOrder = await packageFactory.makeDbPackage({
       recipientId: recipient.id,
