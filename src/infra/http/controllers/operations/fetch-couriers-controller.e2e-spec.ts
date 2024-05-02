@@ -1,39 +1,48 @@
-import { makeCourier } from 'test/factories/make-courier'
-import { InMemoryCouriersRepository } from 'test/repositories/in-memory-couriers-repository'
-import { FetchCouriersUseCase } from './fetch-couriers-controller'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { makeAdmin } from 'test/factories/make-admin'
+import { CourierFactory } from 'test/factories/make-courier'
 
-let inMemoryCouriersRepository: InMemoryCouriersRepository
-let sut: FetchCouriersUseCase
+describe('Fetch Couriers (e2e)', () => {
+  let app: INestApplication
+  let jwt: JwtService
+  let courierFactory: CourierFactory
 
-describe('Fetch Couriers Use Case (unit tests)', () => {
-  beforeEach(() => {
-    inMemoryCouriersRepository = new InMemoryCouriersRepository()
-    sut = new FetchCouriersUseCase(inMemoryCouriersRepository)
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [CourierFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+    jwt = moduleRef.get(JwtService)
+    courierFactory = moduleRef.get(CourierFactory)
+
+    await app.init()
   })
 
-  it('should be able to fetch couriers', async () => {
-    await inMemoryCouriersRepository.create(makeCourier())
-    await inMemoryCouriersRepository.create(makeCourier())
-    await inMemoryCouriersRepository.create(makeCourier())
+  test('[DELETE] /couriers', async () => {
+    const admin = makeAdmin()
+    const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
 
-    const result = await sut.execute({
-      page: 1,
-    })
+    await Promise.all([
+      courierFactory.makeDbCourier(),
+      courierFactory.makeDbCourier(),
+      courierFactory.makeDbCourier(),
+      courierFactory.makeDbCourier(),
+      courierFactory.makeDbCourier(),
+    ])
 
-    expect(result.isRight()).toBe(true)
-    expect(result.value?.couriers).toHaveLength(3)
-  })
+    const response = await request(app.getHttpServer())
+      .get('/couriers')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send()
 
-  it('should be able to fetch paginated couriers', async () => {
-    for (let i = 0; i < 22; i++) {
-      await inMemoryCouriersRepository.create(makeCourier())
-    }
-
-    const result = await sut.execute({
-      page: 2,
-    })
-
-    expect(result.isRight()).toBe(true)
-    expect(result.value?.couriers).toHaveLength(2)
+    expect(response.status).toBe(200)
+    expect(response.body.couriers).toHaveLength(5)
   })
 })

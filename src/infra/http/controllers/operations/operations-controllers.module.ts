@@ -4,6 +4,7 @@ import { CreateRecipientUseCase } from '@/domain/operations/application/use-case
 import { DeleteCourierUseCase } from '@/domain/operations/application/use-cases/delete-courier'
 import { DeletePackageUseCase } from '@/domain/operations/application/use-cases/delete-package'
 import { DeleteRecipientUseCase } from '@/domain/operations/application/use-cases/delete-recipient'
+import { FetchCouriersUseCase } from '@/domain/operations/application/use-cases/fetch-couriers'
 import { CryptographyModule } from '@/infra/cryptography/cryptography.module'
 import { DatabaseModule } from '@/infra/database/database.module'
 import { StorageModule } from '@/infra/storage/storage.module'
@@ -14,6 +15,7 @@ import { CreateRecipientController } from './create-recipient-controller'
 import { DeleteCourierController } from './delete-courier-controller'
 import { DeletePackageController } from './delete-package-controller'
 import { DeleteRecipientController } from './delete-recipient-controller'
+import { FetchCourierController } from './fetch-couriers-controller'
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, StorageModule],
@@ -24,6 +26,7 @@ import { DeleteRecipientController } from './delete-recipient-controller'
     DeleteCourierController,
     DeletePackageController,
     DeleteRecipientController,
+    FetchCourierController,
   ],
   providers: [
     CreateCourierUseCase,
@@ -32,6 +35,7 @@ import { DeleteRecipientController } from './delete-recipient-controller'
     DeleteCourierUseCase,
     DeletePackageUseCase,
     DeleteRecipientUseCase,
+    FetchCouriersUseCase,
   ],
 })
 export class OperationsControllersModule {}

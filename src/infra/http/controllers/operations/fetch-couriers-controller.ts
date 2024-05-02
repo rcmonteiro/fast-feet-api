@@ -1,30 +1,49 @@
-import { Either, right } from '@/core/either'
-import { CouriersRepository } from '@/domain/auth/application/repositories/couriers-repository'
-import { Courier } from '@/domain/auth/enterprise/entities/courier'
-import { Injectable } from '@nestjs/common'
+import { FetchCouriersUseCase } from '@/domain/operations/application/use-cases/fetch-couriers'
+import { Admin } from '@/infra/auth/admin'
+import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
+import { RolesGuard } from '@/infra/auth/jwt-roles.guard'
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpCode,
+  Query,
+  UseGuards,
+} from '@nestjs/common'
+import { z } from 'zod'
+import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
+import { CourierPresenter } from '../../presenters/courier-presenter'
 
-interface FetchCouriersUseCaseRequest {
-  page: number
-}
+const pageQueryParamSchema = z
+  .string()
+  .optional()
+  .default('1')
+  .transform(Number)
+  .pipe(z.number().min(1))
 
-type FetchCouriersUseCaseResponse = Either<
-  null,
-  {
-    couriers: Courier[]
-  }
->
+const queryValidationPipe = new ZodValidationPipe(pageQueryParamSchema)
 
-@Injectable()
-export class FetchCouriersUseCase {
-  constructor(private couriersRepository: CouriersRepository) {}
+type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>
 
-  async execute({
-    page,
-  }: FetchCouriersUseCaseRequest): Promise<FetchCouriersUseCaseResponse> {
-    const couriers = await this.couriersRepository.findMany({ page })
+@Controller('/couriers')
+@Admin()
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class FetchCourierController {
+  constructor(private fetchCouriers: FetchCouriersUseCase) {}
 
-    return right({
-      couriers,
+  @Get()
+  @HttpCode(200)
+  async handle(@Query('page', queryValidationPipe) page: PageQueryParamSchema) {
+    const result = await this.fetchCouriers.execute({
+      page,
     })
+
+    if (result.isLeft()) {
+      throw new BadRequestException()
+    }
+
+    const couriers = result.value.couriers
+
+    return { couriers: couriers.map(CourierPresenter.toHTTP) }
   }
 }
