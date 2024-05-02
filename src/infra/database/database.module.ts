@@ -1,5 +1,6 @@
 import { AdminsRepository } from '@/domain/auth/application/repositories/admins-repository'
 import { CouriersRepository } from '@/domain/auth/application/repositories/couriers-repository'
+import { PhotosRepository } from '@/domain/delivery/application/repositories/photos-repository'
 import { NotificationsRepository } from '@/domain/notification/application/repositories/notifications-repository'
 import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
 import { RecipientsRepository } from '@/domain/operations/application/repositories/recipients-repository'
@@ -10,6 +11,7 @@ import { PrismaAdminsRepository } from './prisma/repositories/prisma-admins-repo
 import { PrismaCouriersRepository } from './prisma/repositories/prisma-courier-repository'
 import { PrismaNotificationsRepository } from './prisma/repositories/prisma-notifications-repository'
 import { PrismaPackagesRepository } from './prisma/repositories/prisma-packages-repository'
+import { PrismaPhotosRepository } from './prisma/repositories/prisma-photo-repository'
 import { PrismaRecipientsRepository } from './prisma/repositories/prisma-recipients-repository'
 
 @Module({
@@ -36,6 +38,10 @@ import { PrismaRecipientsRepository } from './prisma/repositories/prisma-recipie
       provide: AdminsRepository,
       useClass: PrismaAdminsRepository,
     },
+    {
+      provide: PhotosRepository,
+      useClass: PrismaPhotosRepository,
+    },
   ],
   exports: [
     PrismaService,
@@ -44,6 +50,7 @@ import { PrismaRecipientsRepository } from './prisma/repositories/prisma-recipie
     PackagesRepository,
     RecipientsRepository,
     AdminsRepository,
+    PhotosRepository,
   ],
 })
 export class DatabaseModule {}
