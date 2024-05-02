@@ -26,6 +26,7 @@ model User {
   password String
   role     UserRole  @default(COURIER)
   Package  Package[]
+  Photo    Photo[]
 
   @@map("users")
 }
@@ -71,6 +72,20 @@ model Package {
 
   recipient Recipient @relation(fields: [recipientId], references: [id])
   courier   User?     @relation(fields: [courierId], references: [id])
+  photos    Photo[]
 
   @@map("packages")
+}
+
+model Photo {
+  id        String  @id @default(uuid())
+  title     String
+  url       String
+  packageId String? @map("package_id")
+  courierId String? @map("courier_id")
+
+  package Package? @relation(fields: [packageId], references: [id])
+  courier User?    @relation(fields: [courierId], references: [id])
+
+  @@map("photos")
 }
