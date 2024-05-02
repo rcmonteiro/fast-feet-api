@@ -9,7 +9,6 @@ import {
   HttpCode,
   Post,
   UnauthorizedException,
-  UsePipes,
 } from '@nestjs/common'
 import { z } from 'zod'
 
@@ -27,8 +26,9 @@ export class AuthenticateAdmin {
 
   @Post()
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(authenticateBodySchema))
-  async handle(@Body() body: TAuthenticate) {
+  async handle(
+    @Body(new ZodValidationPipe(authenticateBodySchema)) body: TAuthenticate,
+  ) {
     const { cpf, password } = body
     const result = await this.authenticateAdmin.execute({
       cpf,

@@ -11,7 +11,6 @@ import {
   HttpCode,
   Post,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common'
 import { z } from 'zod'
 
@@ -29,8 +28,9 @@ export class CreatePackageController {
   constructor(private createPackage: CreatePackageUseCase) {}
   @Post()
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(createPackageBodySchema))
-  async handle(@Body() body: TCreatePackage) {
+  async handle(
+    @Body(new ZodValidationPipe(createPackageBodySchema)) body: TCreatePackage,
+  ) {
     const { name, recipientId } = body
     const result = await this.createPackage.execute({
       name,

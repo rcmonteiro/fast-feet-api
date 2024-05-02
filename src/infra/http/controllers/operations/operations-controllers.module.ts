@@ -7,6 +7,9 @@ import { DeleteRecipientUseCase } from '@/domain/operations/application/use-case
 import { FetchCouriersUseCase } from '@/domain/operations/application/use-cases/fetch-couriers'
 import { FetchPackagesUseCase } from '@/domain/operations/application/use-cases/fetch-packages'
 import { FetchRecipientsUseCase } from '@/domain/operations/application/use-cases/fetch-recipients'
+import { UpdateCourierUseCase } from '@/domain/operations/application/use-cases/update-courier'
+import { UpdatePackageUseCase } from '@/domain/operations/application/use-cases/update-package'
+import { UpdateRecipientUseCase } from '@/domain/operations/application/use-cases/update-recipient'
 import { CryptographyModule } from '@/infra/cryptography/cryptography.module'
 import { DatabaseModule } from '@/infra/database/database.module'
 import { StorageModule } from '@/infra/storage/storage.module'
@@ -20,6 +23,9 @@ import { DeleteRecipientController } from './delete-recipient-controller'
 import { FetchCourierController } from './fetch-couriers-controller'
 import { FetchPackageController } from './fetch-packages-controller'
 import { FetchRecipientController } from './fetch-recipients-controller'
+import { UpdateCourierController } from './update-courier-controller'
+import { UpdatePackageController } from './update-package-controller'
+import { UpdateRecipientController } from './update-recipient-controller'
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, StorageModule],
@@ -33,6 +39,9 @@ import { FetchRecipientController } from './fetch-recipients-controller'
     FetchCourierController,
     FetchPackageController,
     FetchRecipientController,
+    UpdateCourierController,
+    UpdatePackageController,
+    UpdateRecipientController,
   ],
   providers: [
     CreateCourierUseCase,
@@ -44,6 +53,9 @@ import { FetchRecipientController } from './fetch-recipients-controller'
     FetchCouriersUseCase,
     FetchPackagesUseCase,
     FetchRecipientsUseCase,
+    UpdateCourierUseCase,
+    UpdatePackageUseCase,
+    UpdateRecipientUseCase,
   ],
 })
 export class OperationsControllersModule {}

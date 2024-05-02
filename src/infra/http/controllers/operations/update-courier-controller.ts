@@ -1,41 +1,52 @@
-import { Either, left, right } from '@/core/either'
 import { ResourceNotFoundError } from '@/core/error/errors/resource-not-found-error'
-import { CouriersRepository } from '@/domain/auth/application/repositories/couriers-repository'
-import { Courier } from '@/domain/auth/enterprise/entities/courier'
-import { Injectable } from '@nestjs/common'
+import { UpdateCourierUseCase } from '@/domain/operations/application/use-cases/update-courier'
+import { Admin } from '@/infra/auth/admin'
+import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
+import { RolesGuard } from '@/infra/auth/jwt-roles.guard'
+import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpCode,
+  Param,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
+import { z } from 'zod'
 
-interface UpdateCourierUseCaseRequest {
-  courierId: string
-  name: string
-}
+const updateCourierBodySchema = z.object({
+  name: z.string(),
+})
 
-type UpdateCourierUseCaseResponse = Either<
-  ResourceNotFoundError,
-  {
-    courier: Courier
-  }
->
+type TupdateCourier = z.infer<typeof updateCourierBodySchema>
 
-@Injectable()
-export class UpdateCourierUseCase {
-  constructor(private couriersRepository: CouriersRepository) {}
+@Controller('/couriers/:courierId')
+@Admin()
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class UpdateCourierController {
+  constructor(private updateCourier: UpdateCourierUseCase) {}
 
-  async execute({
-    courierId,
-    name,
-  }: UpdateCourierUseCaseRequest): Promise<UpdateCourierUseCaseResponse> {
-    const courier = await this.couriersRepository.findById(courierId)
-
-    if (!courier) {
-      return left(new ResourceNotFoundError())
-    }
-
-    courier.name = name
-
-    await this.couriersRepository.save(courier)
-
-    return right({
-      courier,
+  @Put()
+  @HttpCode(204)
+  async handle(
+    @Param('courierId') courierId: string,
+    @Body(new ZodValidationPipe(updateCourierBodySchema)) body: TupdateCourier,
+  ) {
+    const { name } = body
+    const result = await this.updateCourier.execute({
+      courierId,
+      name,
     })
+
+    if (result.isLeft()) {
+      const error = result.value
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new BadRequestException(error.message)
+        default:
+          throw new BadRequestException(error.message)
+      }
+    }
   }
 }

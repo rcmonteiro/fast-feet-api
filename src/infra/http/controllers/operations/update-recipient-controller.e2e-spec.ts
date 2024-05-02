@@ -1,41 +1,59 @@
-import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { Recipient } from '@/domain/operations/enterprise/entities/recipient'
-import { makeRecipient } from 'test/factories/make-recipient'
-import { InMemoryRecipientsRepository } from 'test/repositories/in-memory-recipients-repository'
-import { UpdateRecipientUseCase } from './update-recipient-controller'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { makeAdmin } from 'test/factories/make-admin'
+import { RecipientFactory } from 'test/factories/make-recipient'
 
-let inMemoryRecipientsRepository: InMemoryRecipientsRepository
-let sut: UpdateRecipientUseCase
+describe('Update Recipient (e2e)', () => {
+  let app: INestApplication
+  let jwt: JwtService
+  let db: PrismaService
+  let recipientFactory: RecipientFactory
 
-describe('Update Recipient Use Case (unit tests)', () => {
-  beforeEach(() => {
-    inMemoryRecipientsRepository = new InMemoryRecipientsRepository()
-    sut = new UpdateRecipientUseCase(inMemoryRecipientsRepository)
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [RecipientFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+    jwt = moduleRef.get(JwtService)
+    db = moduleRef.get(PrismaService)
+    recipientFactory = moduleRef.get(RecipientFactory)
+
+    await app.init()
   })
 
-  it('should be able to update a recipient', async () => {
-    const recipient = await makeRecipient({}, new UniqueEntityId('recipient-1'))
-    recipient.name = 'John Doe'
-    await inMemoryRecipientsRepository.create(recipient)
-    const result = await sut.execute({
-      recipientId: 'recipient-1',
-      name: 'John Doe - Updated',
-      city: recipient.city,
-      state: recipient.state,
-      postalCode: recipient.postalCode,
-      address: recipient.address,
-      number: recipient.number,
-      complement: recipient.complement,
-      latitude: recipient.latitude,
-      longitude: recipient.longitude,
-    })
+  test('[PUT] /recipients', async () => {
+    const recipient = await recipientFactory.makeDbRecipient()
+    const recipientId = recipient.id.toString()
+    const admin = makeAdmin()
+    const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
+    const response = await request(app.getHttpServer())
+      .put(`/recipients/${recipientId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'John Doe Updated',
+        city: recipient.city,
+        state: recipient.state,
+        postalCode: recipient.postalCode,
+        address: recipient.address,
+        number: recipient.number,
+        complement: recipient.complement,
+        latitude: recipient.latitude,
+        longitude: recipient.longitude,
+      })
 
-    expect(result.isRight()).toBe(true)
-    if (result.isRight()) {
-      expect(result.value?.recipient).toBeInstanceOf(Recipient)
-      expect(inMemoryRecipientsRepository.items[0].name).toEqual(
-        'John Doe - Updated',
-      )
-    }
+    const recipientInDb = await db.recipient.findFirst()
+    expect(response.status).toBe(204)
+    expect(recipientInDb).toEqual(
+      expect.objectContaining({
+        name: 'John Doe Updated',
+      }),
+    )
   })
 })

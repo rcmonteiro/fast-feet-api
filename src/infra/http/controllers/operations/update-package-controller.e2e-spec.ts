@@ -1,33 +1,58 @@
-import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { Package } from '@/domain/operations/enterprise/entities/package'
-import { makePackage } from 'test/factories/make-package'
-import { InMemoryPackagesRepository } from 'test/repositories/in-memory-packages-repository'
-import { UpdatePackageUseCase } from './update-package-controller'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { makeAdmin } from 'test/factories/make-admin'
+import { PackageFactory } from 'test/factories/make-package'
+import { RecipientFactory } from 'test/factories/make-recipient'
 
-let inMemoryPackagesRepository: InMemoryPackagesRepository
-let sut: UpdatePackageUseCase
+describe('Create Package (e2e)', () => {
+  let app: INestApplication
+  let jwt: JwtService
+  let db: PrismaService
+  let packageFactory: PackageFactory
+  let recipientFactory: RecipientFactory
 
-describe('Update Package Use Case (unit tests)', () => {
-  beforeEach(() => {
-    inMemoryPackagesRepository = new InMemoryPackagesRepository()
-    sut = new UpdatePackageUseCase(inMemoryPackagesRepository)
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [PackageFactory, RecipientFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+    jwt = moduleRef.get(JwtService)
+    db = moduleRef.get(PrismaService)
+    packageFactory = moduleRef.get(PackageFactory)
+    recipientFactory = moduleRef.get(RecipientFactory)
+
+    await app.init()
   })
 
-  it('should be able to update a package', async () => {
-    const packageOrder = await makePackage({}, new UniqueEntityId('package-1'))
-    await inMemoryPackagesRepository.create(packageOrder)
-    const result = await sut.execute({
-      packageId: 'package-1',
-      name: 'John Doe - Updated',
-      recipientId: packageOrder.recipientId.toString(),
+  test('[PUT] /packages', async () => {
+    const recipient = await recipientFactory.makeDbRecipient()
+    const packageOrder = await packageFactory.makeDbPackage({
+      recipientId: recipient.id,
     })
+    const packageId = packageOrder.id.toString()
+    const admin = makeAdmin()
+    const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
+    const response = await request(app.getHttpServer())
+      .put(`/packages/${packageId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'John Doe Updated',
+        recipientId: recipient.id.toString(),
+      })
 
-    expect(result.isRight()).toBe(true)
-    if (result.isRight()) {
-      expect(result.value?.packageOrder).toBeInstanceOf(Package)
-      expect(inMemoryPackagesRepository.items[0].name).toEqual(
-        'John Doe - Updated',
-      )
-    }
+    const packageInDb = await db.package.findFirst()
+    expect(response.status).toBe(204)
+    expect(packageInDb).toEqual(
+      expect.objectContaining({
+        name: 'John Doe Updated',
+      }),
+    )
   })
 })

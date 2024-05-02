@@ -10,7 +10,6 @@ import {
   HttpCode,
   Post,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common'
 import { z } from 'zod'
 
@@ -35,8 +34,10 @@ export class CreateRecipientController {
   constructor(private createRecipient: CreateRecipientUseCase) {}
   @Post()
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(createRecipientBodySchema))
-  async handle(@Body() body: TCreateRecipient) {
+  async handle(
+    @Body(new ZodValidationPipe(createRecipientBodySchema))
+    body: TCreateRecipient,
+  ) {
     const {
       name,
       city,

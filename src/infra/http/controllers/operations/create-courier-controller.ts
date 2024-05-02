@@ -12,7 +12,6 @@ import {
   HttpCode,
   Post,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common'
 import { z } from 'zod'
 
@@ -33,8 +32,9 @@ export class CreateCourierController {
 
   @Post()
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(createCourierBodySchema))
-  async handle(@Body() body: TCreateCourier) {
+  async handle(
+    @Body(new ZodValidationPipe(createCourierBodySchema)) body: TCreateCourier,
+  ) {
     const { name, email, cpf, password } = body
     const result = await this.createCourier.execute({
       name,
