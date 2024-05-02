@@ -1,5 +1,7 @@
 import { AuthenticateAdminUseCase } from '@/domain/auth/application/use-cases/authenticate-admin'
 import { WrongCredentialsError } from '@/domain/auth/application/use-cases/errors/wrong-credentials-error'
+import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
+import { RolesGuard } from '@/infra/auth/jwt-roles.guard'
 import { Public } from '@/infra/auth/public'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import {
@@ -9,6 +11,7 @@ import {
   HttpCode,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common'
 import { z } from 'zod'
 
@@ -21,6 +24,7 @@ type TAuthenticate = z.infer<typeof authenticateBodySchema>
 
 @Controller('/admins/sessions')
 @Public()
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class AuthenticateAdmin {
   constructor(private authenticateAdmin: AuthenticateAdminUseCase) {}
 
