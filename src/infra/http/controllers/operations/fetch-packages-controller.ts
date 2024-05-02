@@ -1,32 +1,49 @@
-import { Either, right } from '@/core/either'
-import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
-import { Package } from '@/domain/operations/enterprise/entities/package'
-import { Injectable } from '@nestjs/common'
+import { FetchPackagesUseCase } from '@/domain/operations/application/use-cases/fetch-packages'
+import { Admin } from '@/infra/auth/admin'
+import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
+import { RolesGuard } from '@/infra/auth/jwt-roles.guard'
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpCode,
+  Query,
+  UseGuards,
+} from '@nestjs/common'
+import { z } from 'zod'
+import { ZodValidationPipe } from '../../pipes/zod-validation-pipe'
+import { PackagePresenter } from '../../presenters/package-presenter'
 
-interface FetchPackagesUseCaseRequest {
-  page: number
-  courierId?: string
-}
+const pageQueryParamSchema = z
+  .string()
+  .optional()
+  .default('1')
+  .transform(Number)
+  .pipe(z.number().min(1))
 
-type FetchPackagesUseCaseResponse = Either<
-  null,
-  {
-    packages: Package[]
-  }
->
+const queryValidationPipe = new ZodValidationPipe(pageQueryParamSchema)
 
-@Injectable()
-export class FetchPackagesUseCase {
-  constructor(private packagesRepository: PackagesRepository) {}
+type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>
 
-  async execute({
-    page,
-    courierId,
-  }: FetchPackagesUseCaseRequest): Promise<FetchPackagesUseCaseResponse> {
-    const packages = await this.packagesRepository.findMany({ page }, courierId)
+@Controller('/packages')
+@Admin()
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class FetchPackageController {
+  constructor(private fetchPackages: FetchPackagesUseCase) {}
 
-    return right({
-      packages,
+  @Get()
+  @HttpCode(200)
+  async handle(@Query('page', queryValidationPipe) page: PageQueryParamSchema) {
+    const result = await this.fetchPackages.execute({
+      page,
     })
+
+    if (result.isLeft()) {
+      throw new BadRequestException()
+    }
+
+    const packages = result.value.packages
+
+    return { packages: packages.map(PackagePresenter.toHTTP) }
   }
 }

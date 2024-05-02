@@ -25,7 +25,7 @@ describe('Fetch Couriers (e2e)', () => {
     await app.init()
   })
 
-  test('[DELETE] /couriers', async () => {
+  test('[GET] /couriers', async () => {
     const admin = makeAdmin()
     const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
 

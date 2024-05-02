@@ -1,39 +1,48 @@
-import { makeRecipient } from 'test/factories/make-recipient'
-import { InMemoryRecipientsRepository } from 'test/repositories/in-memory-recipients-repository'
-import { FetchRecipientsUseCase } from './fetch-recipients-controller'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { makeAdmin } from 'test/factories/make-admin'
+import { RecipientFactory } from 'test/factories/make-recipient'
 
-let inMemoryRecipientsRepository: InMemoryRecipientsRepository
-let sut: FetchRecipientsUseCase
+describe('Fetch Recipients (e2e)', () => {
+  let app: INestApplication
+  let jwt: JwtService
+  let recipientFactory: RecipientFactory
 
-describe('Fetch Recipients Use Case (unit tests)', () => {
-  beforeEach(() => {
-    inMemoryRecipientsRepository = new InMemoryRecipientsRepository()
-    sut = new FetchRecipientsUseCase(inMemoryRecipientsRepository)
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [RecipientFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+    jwt = moduleRef.get(JwtService)
+    recipientFactory = moduleRef.get(RecipientFactory)
+
+    await app.init()
   })
 
-  it('should be able to fetch recipients', async () => {
-    await inMemoryRecipientsRepository.create(makeRecipient())
-    await inMemoryRecipientsRepository.create(makeRecipient())
-    await inMemoryRecipientsRepository.create(makeRecipient())
+  test('[GET] /recipients', async () => {
+    const admin = makeAdmin()
+    const accessToken = jwt.sign({ sub: admin.id.toString(), role: admin.role })
 
-    const result = await sut.execute({
-      page: 1,
-    })
+    await Promise.all([
+      recipientFactory.makeDbRecipient(),
+      recipientFactory.makeDbRecipient(),
+      recipientFactory.makeDbRecipient(),
+      recipientFactory.makeDbRecipient(),
+      recipientFactory.makeDbRecipient(),
+    ])
 
-    expect(result.isRight()).toBe(true)
-    expect(result.value?.recipients).toHaveLength(3)
-  })
+    const response = await request(app.getHttpServer())
+      .get('/recipients')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send()
 
-  it('should be able to fetch paginated recipients', async () => {
-    for (let i = 0; i < 22; i++) {
-      await inMemoryRecipientsRepository.create(makeRecipient())
-    }
-
-    const result = await sut.execute({
-      page: 2,
-    })
-
-    expect(result.isRight()).toBe(true)
-    expect(result.value?.recipients).toHaveLength(2)
+    expect(response.status).toBe(200)
+    expect(response.body.recipients).toHaveLength(5)
   })
 })
