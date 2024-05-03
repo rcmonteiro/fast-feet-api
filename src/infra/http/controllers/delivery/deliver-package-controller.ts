@@ -25,10 +25,11 @@ export class DeliverPackageController {
   @HttpCode(204)
   async handle(
     @Param('packageId') packageId: string,
-    @Body() photoId: string,
+    @Body() body: { photoId: string },
     @CurrentUser() user: TTokenPayload,
   ) {
     const courierId = user.sub
+    const photoId = body.photoId
     const result = await this.deliverPackage.execute({
       packageId,
       courierId,
