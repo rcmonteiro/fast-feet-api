@@ -37,7 +37,10 @@ describe('Fetch My Packages (e2e)', () => {
       role: courier.role,
     })
 
-    const recipient = await recipientFactory.makeDbRecipient()
+    const recipient = await recipientFactory.makeDbRecipient({
+      latitude: -23.5505199,
+      longitude: -46.6333093,
+    })
     await Promise.all([
       packageFactory.makeDbPackage({
         recipientId: recipient.id,
@@ -63,6 +66,12 @@ describe('Fetch My Packages (e2e)', () => {
 
     const response = await request(app.getHttpServer())
       .get(`/couriers/${courier.id}/packages`)
+      .query({
+        page: 1,
+        distance: 10,
+        userLatitude: -23.5505199,
+        userLongitude: -46.6333093,
+      })
       .set('Authorization', `Bearer ${accessToken}`)
       .send()
 

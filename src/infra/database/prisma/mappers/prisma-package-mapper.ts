@@ -2,6 +2,12 @@ import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 import { Package } from '@/domain/operations/enterprise/entities/package'
 import { Prisma, Package as PrismaPackage } from '@prisma/client'
 
+export interface rawPackage {
+  id: string
+  recipient_id: string
+  name: string
+}
+
 export abstract class PrismaPackageMapper {
   public static toDomain(raw: PrismaPackage): Package {
     return Package.create(
@@ -13,6 +19,16 @@ export abstract class PrismaPackageMapper {
         collectedAt: raw.collectedAt,
         deliveredAt: raw.deliveredAt,
         returnedAt: raw.returnedAt,
+      },
+      new UniqueEntityId(raw.id),
+    )
+  }
+
+  public static rawToDomain(raw: rawPackage): Package {
+    return Package.create(
+      {
+        name: raw.name,
+        recipientId: new UniqueEntityId(raw.recipient_id),
       },
       new UniqueEntityId(raw.id),
     )

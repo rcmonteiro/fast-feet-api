@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Query,
   UseGuards,
 } from '@nestjs/common'
@@ -31,9 +32,19 @@ export class FetchPackageController {
 
   @Get()
   @HttpCode(200)
-  async handle(@Query('page', queryValidationPipe) page: PageQueryParamSchema) {
+  async handle(
+    @Query('page', queryValidationPipe) page: PageQueryParamSchema,
+    @Param('courierId') courierId: string,
+    @Query('distance') distance?: number,
+    @Query('userLatitude') userLatitude?: number,
+    @Query('userLongitude') userLongitude?: number,
+  ) {
     const result = await this.fetchPackages.execute({
       page,
+      courierId,
+      distance,
+      userLatitude,
+      userLongitude,
     })
 
     if (result.isLeft()) {
@@ -42,6 +53,8 @@ export class FetchPackageController {
 
     const packages = result.value.packages
 
-    return { packages: packages.map(PackagePresenter.toHTTP) }
+    return {
+      packages: packages.map(PackagePresenter.toHTTP),
+    }
   }
 }

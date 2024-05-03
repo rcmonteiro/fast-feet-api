@@ -3,7 +3,10 @@ import { PaginationParams } from '@/core/repositories/pagination-params'
 import { PackagesRepository } from '@/domain/operations/application/repositories/packages-repository'
 import { Package } from '@/domain/operations/enterprise/entities/package'
 import { Injectable } from '@nestjs/common'
-import { PrismaPackageMapper } from '../mappers/prisma-package-mapper'
+import {
+  PrismaPackageMapper,
+  rawPackage,
+} from '../mappers/prisma-package-mapper'
 import { PrismaService } from '../prisma.service'
 
 @Injectable()
@@ -27,18 +30,23 @@ export class PrismaPackagesRepository implements PackagesRepository {
   async findMany(
     { page }: PaginationParams,
     courierId?: string,
+    distance?: number,
+    userLatitude?: number,
+    userLongitude?: number,
   ): Promise<Package[]> {
-    const packages = await this.db.package.findMany({
-      where: courierId
-        ? {
-            courierId,
-          }
-        : {},
-      take: this.PAGE_SIZE,
-      skip: (page - 1) * this.PAGE_SIZE,
-    })
+    const packages = await this.db.$queryRawUnsafe<rawPackage[]>(`
+      SELECT
+        P.id, P.name, P.recipient_id as recipientId
+      FROM packages as P
+      INNER JOIN recipients as R ON R.id = P.recipient_id
+      WHERE 1 = 1
+        ${courierId ? `AND P.courier_id = '${courierId}'` : ''}
+        ${distance ? `AND ( 6371 * acos( cos( radians(${userLatitude}) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(${userLongitude}) ) + sin( radians(${userLatitude}) ) * sin( radians( latitude ) ) ) ) <= ${distance}` : ''}
+      LIMIT ${this.PAGE_SIZE}
+      OFFSET ${(page - 1) * this.PAGE_SIZE}
+    `)
 
-    return packages.map(PrismaPackageMapper.toDomain)
+    return packages.map(PrismaPackageMapper.rawToDomain)
   }
 
   async create(packageOrder: Package): Promise<void> {
