@@ -1,21 +1,58 @@
 services:
+  fast-feet-api:
+    build:
+      context: .
+    container_name: fast-feet-api
+    ports:
+      - 3001:3333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - fast-feet-network
+
   postgres:
     container_name: fast-feet-pg
-    image: postgres
+    image: bitnami/postgresql
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: docker
       POSTGRES_DB: fast-feet
-      PGDATA: /data/postgres
     volumes:
-      - ./data/pg:/data/postgres
-    
+      - db:/data/postgres
+    networks:
+      - fast-feet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   cache:
     container_name: fast-feet-cache
-    image: redis
+    image: bitnami/redis
     ports:
       - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     volumes:
-      - ./data/redis:/data
+      - redis:/data
+    networks:
+      - fast-feet-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  fast-feet-network:
+    driver: bridge
+
+volumes:
+  db:
+  redis:

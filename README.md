@@ -26,3 +26,5 @@
 [x] Somente o `admin` pode alterar a senha de um usuário
 [x] Não deve ser possível um entregador listar as encomendas de outro entregador
 
+# Docker
+
