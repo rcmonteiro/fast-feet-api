@@ -11,11 +11,11 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-l
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN apt-get update -y && apt-get install -y openssl
-RUN npx prisma migrate deploy
+RUN pnpm prisma generate
 RUN pnpm run build
 
 FROM base
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 EXPOSE 3000
-CMD [ "pnpm", "start:prod" ]
+CMD [ "npx", "prisma", "migrate", "deploy", "&&", "pnpm", "start:prod" ]

@@ -1,21 +1,8 @@
 services:
-  fast-feet-api:
-    build:
-      context: .
-    container_name: fast-feet-api
-    ports:
-      - 3001:3333
-    depends_on:
-      postgres:
-        condition: service_healthy
-      cache:
-        condition: service_healthy
-    networks:
-      - fast-feet-network
-
   postgres:
     container_name: fast-feet-pg
     image: bitnami/postgresql
+    restart: always
     ports:
       - 5432:5432
     environment:
@@ -49,9 +36,24 @@ services:
       timeout: 5s
       retries: 5
 
+  fast-feet-api:
+    build:
+      context: .
+    container_name: fast-feet-api
+    ports:
+      - 3001:3333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - fast-feet-network
+
 networks:
   fast-feet-network:
     driver: bridge
+    external : true
 
 volumes:
   db:
